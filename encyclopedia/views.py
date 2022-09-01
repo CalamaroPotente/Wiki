@@ -3,7 +3,7 @@ from . import util
 import markdown2
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-import logging
+import random
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -48,4 +48,19 @@ def create_entry(request):
         return HttpResponseRedirect(reverse("name", kwargs={"name": title}))
     return render(request, "encyclopedia/createentry.html")
     
-   
+def display_edit(request, name):
+    return render(request, "encyclopedia/edit.html", {
+           "name": name,
+           "content": util.get_entry(name)
+        })
+
+def edit(request, name):
+    content = f"{request.POST.getlist('edit')}"[2:][:-2]
+    content = content.replace('\\r','\r').replace('\\n', '\n')
+    util.save_entry(name, content)
+    return HttpResponseRedirect(reverse("name", kwargs={"name": name}))
+
+def random_selector(request):
+    name = random.choice(util.list_entries())
+    return HttpResponseRedirect(reverse("name", kwargs={"name": name}))
+    
